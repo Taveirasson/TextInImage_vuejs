@@ -1,4 +1,4 @@
-# editorimagens
+#  Text in Image
 
 ## Project setup
 ```
