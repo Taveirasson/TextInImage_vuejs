@@ -7,11 +7,12 @@
             <p class="fixed-bottom text" :style="textStyle">{{text.bottom}}</p>
       </div>
 
+      
+
       <div class="col-md-6">
         <h1 class="mt-2">
            Meme Text
         </h1>
-
         <div class="form-group">
           <input type="url" placeholder="Link Imagem" class="form-control" v-model="image.src"> 
         </div>
@@ -43,22 +44,37 @@
              </option>
            </select>
         </div>
-
-        <button class="btn btn-outline-primary" @click="resetInputs()">Reset</button>
+        <div class="buttons">
+            <div class="form-group">
+            <button class="btn btn-outline-primary" @click="resetInputs()">Reset</button>
+            </div>
+            <div class="form-group">
+            <button class="btn btn-outline-danger" @click="dowloadImageText()">Dowload Image</button>
+            </div>
+        </div>
       </div>
+     <div class="col-md-6">
+            <br>
+            <imageGallery @emit-update-image='updateImage' />
+     </div>
+
     </div>
 </template>
 
 <script>
-var imgP = "https://img.freepik.com/fotos-gratis/imagem-aproximada-da-cabeca-de-um-lindo-leao_181624-35855.jpg?w=2000";
+var srcFirstImage = "images/lion.avif";
+
+import html2canvas from 'html2canvas';
 
 import TextColor from './textColor.vue';
+import ImageGallery from './ImageGallery.vue';
 
 export default {
 
     name: "ImagemEdit",
     components:{
-        TextColor
+        TextColor,
+        ImageGallery
     },
     data(){
         return{
@@ -84,7 +100,7 @@ export default {
         };
     },
     created(){
-        this.image.src = imgP;
+        this.image.src = srcFirstImage;
     },
     computed:{
         textStyle(){
@@ -118,16 +134,44 @@ export default {
             this.text.shadow = color;
         },
 
-      toggleTextShadow() {
-        this.text.withshadow = !this.text.withshadow;
-      },
-      toggleTextUpper(){
-          this.text.upper = !this.text.upper;
-      },
+        toggleTextShadow() {
+            this.text.withshadow = !this.text.withshadow;
+        },
+        toggleTextUpper(){
+            this.text.upper = !this.text.upper;
+        },
 
-      uptadeFontFamily(){
-        this.text.fontfamily = event.target.value;
-      },
+        uptadeFontFamily(){
+            this.text.fontfamily = event.target.value;
+        },
+
+        updateImage(image){
+            this.image.src = image;
+        },
+
+        async dowloadImageText(){
+            const elementToCapture = document.getElementById('main-content');
+
+            try{
+                const canvas = await html2canvas(elementToCapture);
+
+                const imageBlob = await new Promise((resolve)=>{
+                    canvas.toBlob(resolve,'image/png')
+                });
+
+                const imageUrl = URL.createObjectURL(imageBlob);
+
+                const a = document.createElement('a');
+                a.href = imageUrl;
+                a.download = 'image_with_text.png';
+
+                a.click();
+                URL.revokeObjectURL(imageUrl);
+            }
+            catch (error) {
+                console.error('Error while saving the image', error);
+            }
+        }
     },
 };
 </script>
